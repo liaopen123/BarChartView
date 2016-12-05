@@ -9,5 +9,6 @@
 
     <com.example.pony.barchartview.view.BarChartView
         android:layout_width="match_parent"
-        android:layout_height="100dp" />
+        android:layout_height="150dp" />
+
 </RelativeLayout>

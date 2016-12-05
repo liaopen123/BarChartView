@@ -5,7 +5,9 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
+import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 
 import java.util.ArrayList;
@@ -16,6 +18,7 @@ import java.util.ArrayList;
  */
 
 public class BarChartView extends View {
+    private static final String TAG = "BarChartView";
     public int mWidth;
     public int mHeight;
     public static int mPaddingRight = 30;
@@ -24,21 +27,25 @@ public class BarChartView extends View {
     public Point mLocationPoint = new Point();//原点的坐标
     public Point mLocationYPoint = new Point();//Y端点的坐标
     public Point mLocationXPoint = new Point();//X断点的坐标
-    public int mYBlankLength = 10;//Y轴顶端用于留白的长度
+    public int mYBlankLength = 30;//Y轴顶端用于留白的长度
     public int mYLength;
     public int mXLength;
     public Paint mPaint = new Paint();
 
     public ArrayList<String> mYNameList =  new ArrayList();
     private ArrayList<String> mXNameList =  new ArrayList();
+    private ArrayList<Double> mYValueList =  new ArrayList();
     private ArrayList<Double> mXValueList =  new ArrayList();
+
 
     public BarChartView(Context context) {
         super(context);
+        initXYName();
     }
 
     public BarChartView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        initXYName();
     }
 
     @Override
@@ -48,33 +55,78 @@ public class BarChartView extends View {
         mHeight = this.getHeight();
         //坐标原点:
         mLocationPoint.x = mPaddingLeft;
-        mLocationPoint.y = mHeight-mPaddingBottom;
+        mLocationPoint.y = -mPaddingBottom;
         //Y端点的坐标
         mLocationYPoint.x = mPaddingLeft;
-        mLocationYPoint.y = 0;
+        mLocationYPoint.y = -mHeight;
         //X端点的坐标
         mLocationXPoint.x = mWidth -mPaddingRight;
-        mLocationXPoint.y = mHeight - mPaddingBottom;
+        mLocationXPoint.y = -mPaddingBottom;
 
         mPaint.setAntiAlias(true);
         mPaint.setColor(Color.BLACK);
         mPaint.setStrokeWidth(3);
+        mPaint.setTextAlign(Paint.Align.RIGHT);
 
         //X轴的长度，Y轴有用部分的长度
-        mYLength = mLocationPoint.y - mYBlankLength;
-        mXLength = mLocationXPoint.x;
+        mYLength = mHeight -mPaddingBottom - mYBlankLength;
+        mXLength = mLocationXPoint.x - mPaddingLeft;
+
     }
 
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+
+       // canvas.rotate(-90);
+        canvas.translate(0,mHeight);
+
 //画坐标线
         //x轴
         canvas.drawLine(mLocationPoint.x,mLocationPoint.y,mLocationXPoint.x,mLocationXPoint.y,mPaint);
         //y轴
         canvas.drawLine(mLocationPoint.x,mLocationPoint.y,mLocationYPoint.x,mLocationYPoint.y,mPaint);
 
+        //绘制Y轴上的字
+        int perYLength = mYLength / mYNameList.size();//Y轴上 每部分的长度  SIZE有可为为0  抛出异常 后期加判断
+
+
+        for(int i=0;i<mYNameList.size();i++){
+        canvas.drawText(mYNameList.get(i)+"  ",mPaddingLeft,-((i+1)*perYLength+mPaddingBottom),mPaint);
+        }
+
+
+        //绘制X轴上的字
+        int perXLength = mXLength / ((mXNameList.size()*2)+1);//Y轴上 每部分的长度  SIZE有可为为0  抛出异常 后期加判断
+        for(int i=0;i<mXNameList.size();i++){
+            Rect rect = new Rect();
+            mPaint.getTextBounds(mXNameList.get(i), 0, mXNameList.get(i).length(), rect);
+            int w = rect.width();
+            int h = rect.height();
+            mPaint.setTextAlign(Paint.Align.CENTER);
+            canvas.drawText(mXNameList.get(i),((i+1)*2*perXLength)+mPaddingLeft,mLocationXPoint.y+h*2,mPaint);
+        }
+
+
+        //绘制柱状图 这里用drawLine来实现
+        for(int i=0;i<mXValueList.size();i++){
+            mPaint.setStrokeWidth(perXLength);
+            if(mXValueList.get(i)>=mYValueList.get(0)){
+                //6以上的值为均匀等分
+                canvas.drawLine(((i+1)*2*perXLength)+mPaddingLeft,-mPaddingBottom,((i+1)*2*perXLength)+mPaddingLeft, (float) -((mXValueList.get(i)-6)*perYLength+perYLength)-mPaddingBottom,mPaint);
+            }else{
+                //6以下平分
+                Log.d(TAG,"6以下");
+                double percent = mXValueList.get(i) / mYValueList.get(0);//百分比  比如 值为4，而Y轴最小值为6，则用4/6 = 0.66666
+                //竖线的话 X坐标值不用变，
+                canvas.drawLine(((i+1)*2*perXLength)+mPaddingLeft,-mPaddingBottom,((i+1)*2*perXLength)+mPaddingLeft, (float) -(percent*perYLength)-getPaddingBottom(),mPaint);
+            }
+
+        }
+
+
+//        canvas.drawCircle(0,0,100,mPaint);
 
 
     }
@@ -101,11 +153,19 @@ public class BarChartView extends View {
     }
 
     private void initXYName() {
+        Log.d(TAG,"initXYName");
         mYNameList.add("6.0");
         mYNameList.add("7.0");
         mYNameList.add("8.0");
         mYNameList.add("9.0");
         mYNameList.add("10.0");
+
+        mYValueList.add(0,6.0);
+        mYValueList.add(1,7.0);
+        mYValueList.add(2,8.0);
+        mYValueList.add(3,9.0);
+        mYValueList.add(4,10.0);
+
 
         mXNameList.add("30");
         mXNameList.add("60");
