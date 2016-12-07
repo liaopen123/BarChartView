@@ -147,12 +147,13 @@ public class BarChartView extends View {
                 //6以下平分
                 Log.d(TAG,"6以下");
                 double percent = mXValueList.get(i) / mYValueList.get(0);//百分比  比如 值为4，而Y轴最小值为6，则用4/6 = 0.66666
+                Log.d(TAG,"percent"+percent);
                 //竖线的话 X坐标值不用变，
-                if(-(percent*perYLength)-getPaddingBottom()<=-currentHeight){
+                if(-                        (percent*perYLength)-mPaddingBottom<=currentHeight){
                     canvas.drawLine(((i + 1) * 2 * perXLength) + mPaddingLeft, -mPaddingBottom, ((i + 1) * 2 * perXLength) + mPaddingLeft, (float)currentHeight, mPaint);
                     refreshData();
                 }else {
-                    canvas.drawLine(((i + 1) * 2 * perXLength) + mPaddingLeft, -mPaddingBottom, ((i + 1) * 2 * perXLength) + mPaddingLeft, (float)-(percent*perYLength)-getPaddingBottom(), mPaint);
+                    canvas.drawLine(((i + 1) * 2 * perXLength) + mPaddingLeft, -mPaddingBottom, ((i + 1) * 2 * perXLength) + mPaddingLeft, (float)-(percent*perYLength)-mPaddingBottom, mPaint);
                 }
             }
 
@@ -213,7 +214,7 @@ public class BarChartView extends View {
         mXNameList.add("330");
         mXNameList.add("360");
 
-        mXValueList.add(6.0);
+        mXValueList.add(4.0);
         mXValueList.add(6.5);
         mXValueList.add(7.0);
         mXValueList.add(7.5);
