@@ -39,7 +39,7 @@ public class BarChartView extends View {
     private ArrayList<String> mXNameList =  new ArrayList();
     private ArrayList<Double> mYValueList =  new ArrayList();
     private ArrayList<Double> mXValueList =  new ArrayList();
-    private int currentHeight = -mPaddingBottom;
+    private int currentHeight = -mPaddingBottom;   //从-mPaddingBottom 开始累加负值  一直为负数
     public Path path;
 
     public BarChartView(Context context) {
